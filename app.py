@@ -17,11 +17,7 @@ import spotipy
 import os
 from spotipy.oauth2 import SpotifyClientCredentials
 from collections import defaultdict
-import boto3
-import csv
-from io import StringIO
 import startup
-import functions
 import math
 
 app = Flask(__name__)
