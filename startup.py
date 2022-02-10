@@ -11,13 +11,12 @@ CLIENT_SECRET = "dac0283d86fd4caba2a848e158b12553"
 #Port and callback url can be changed or ledt to localhost:5000
 PORT = "5000"
 CALLBACK_URL = "http://localhost"
-#red_uri='https://spotify-recommender-engine.herokuapp.com/'
+red_uri='https://spotify-recommender-engine.herokuapp.com/'
 #CALLBACK_URL = "https://automated-credit-system.herokuapp.com/"
 #Add needed scope from spotify user
 SCOPE = "user-library-read playlist-modify-public"
 #token_data will hold authentication header with access code, the allowed scopes, and the refresh countdown
 TOKEN_DATA = []
-"""
 def getUser():
     return getAuth(CLIENT_ID, red_uri, SCOPE)
 
@@ -32,7 +31,7 @@ def getUser():
 def getUserToken(code):
     global TOKEN_DATA
     TOKEN_DATA = getToken(code, CLIENT_ID, CLIENT_SECRET, "{}:{}/callback/".format(CALLBACK_URL, PORT))
-
+"""
 
 def refreshToken(time):
     time.sleep(time)
