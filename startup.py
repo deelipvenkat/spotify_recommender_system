@@ -11,7 +11,7 @@ CLIENT_SECRET = "dac0283d86fd4caba2a848e158b12553"
 #Port and callback url can be changed or ledt to localhost:5000
 PORT = "5000"
 CALLBACK_URL = "http://localhost"
-red_uri='https://spotify-recommender-engine.herokuapp.com/callback/'
+red_uri='https://spotify-recommender-engine.herokuapp.com/'
 #CALLBACK_URL = "https://automated-credit-system.herokuapp.com/"
 #Add needed scope from spotify user
 SCOPE = "user-library-read playlist-modify-public"
