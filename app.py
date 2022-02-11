@@ -207,7 +207,7 @@ def callback():
     w=[]
     for i in range(0,saved_count):
         w.append({'name':tom[i]['track']['name'],'year':int(tom[i]['track']['album']['release_date'][:4])})
-        w=w[0]
+        
 
     data = pd.read_csv('final_data.csv',nrows=10000)
     
