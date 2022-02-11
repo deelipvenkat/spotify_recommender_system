@@ -207,9 +207,9 @@ def callback():
     w=[]
     for i in range(0,saved_count):
         w.append({'name':tom[i]['track']['name'],'year':int(tom[i]['track']['album']['release_date'][:4])})
-        w=w[0:20]
+        w=w[0]
 
-    data = pd.read_csv('final_data.csv',nrows=1000)
+    data = pd.read_csv('final_data.csv',nrows=10000)
     
     f=spotify_df(rec_per_cluster(playlist_cluster_center(w,data)),data)    
     f=f.reset_index(drop=True)
