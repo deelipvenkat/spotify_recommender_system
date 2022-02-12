@@ -194,7 +194,7 @@ def callback():
     startup.getUserToken(request.args['code'])
     tk=startup.getAccessToken()[0]
     sp=spotipy.Spotify(auth=tk)
-    
+    """
     save=sp.current_user_saved_tracks()
     saved_count=save['total']
     k=math.ceil(saved_count/20)
@@ -216,9 +216,9 @@ def callback():
     user_id=sp.current_user()['id'] # finding user_id
     playlist_ids=sp.user_playlist_create(user_id,'music_rec',public=True, collaborative=False)['id']# tracking new playlist_id 
     sp.playlist_add_items(playlist_ids,list(f.iloc[:,3].values)) # adding songs in the playlist
-    src_html='https://open.spotify.com/embed/playlist/{}?utm_source=generator&theme=0'.format(playlist_ids)
-    
-    return render_template('spotify.html',output=src_html)
+    src_html='https://open.spotify.com/embed/playlist/{}?utm_source=generator&theme=0'.format(playlist_ids) """
+    return render_template('spotify.html')
+    #return render_template('spotify.html',output=src_html)
     #return redirect(url_for('index'))
 
 
