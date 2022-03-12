@@ -1,2 +1,2 @@
-# spotify_recommender_system
+# Spotify Music Recommender System
 introduction
