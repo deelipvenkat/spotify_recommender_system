@@ -1,13 +1,15 @@
 # Spotify Music Recommender System
 ### OBJECTIVE
-
-
+We are going to build a music recommender system using spotify dataset & deploy it in a
 
 
 ### ABOUT THE DATASET 
 
 
 ### TECHNOLOGY STACK USED 
+I have built this project in jupyter notebook(python3.7). Spotipy library was used for connecting to spotify api & access user data. Oauth library was used for creating a sign in page for our web app using spotify credentials for authorizing client & generating session token. Python flask web framework was used for building the application. The application was deployed in AWS Elastic BeanStalk.
+
+To install all the dependencies for this project, download the requirements.txt file & run the below command line in the terminal.
 ```
 pip install -r requirements.txt
 ```
