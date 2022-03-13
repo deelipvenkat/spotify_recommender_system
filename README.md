@@ -48,14 +48,34 @@ body{ background-image: url('../templates/back.png');}
 </body>
 </html>
   ```
+  
+### CREATING .ebextension DIRECTORY 
+
+We can configure our Elastic Beanstalk environment & customize aws resources by adding .config files in .ebextensions directory.
+
+LET'S configure our python environment which is going to run the application in aws by creating a python.config & adding the below code.
+```
+option_settings:
+  "aws:elasticbeanstalk:container:python":
+    WSGIPath: application.py
+```   
+   
 ### INCREASING TIMEOUT FOR THE APPLICATION 
 
 After the user signs into the application , the user's saved tracks from the library is collected through the api & is feed into the k means clustering model to categorize the songs into groups & cosine similarity of saved tracks with the initial dataset is computed to find similar songs to the liking of the user. All of these computations take about 2 minutes. Most of the cloud platforms keep the default time-out to 50 seconds to avoid any malicious code stuck in loop & costing more cloud expenses. So in our case we are going to increase our timeout to suit our needs.
 
-So let's create another config file which tells our aws to increase timeout limit . In this case we have increased it to 300 seconds.
+So let's create another config file which tells our aws to increase timeout limit. Addd the  In this case we have increased it to 300 seconds.
+
 
 ```
 option_settings:
   aws:elasticbeanstalk:command:
     Timeout: 300
 ```
+
+### 
+
+```
+web: uwsgi --http :8000 --wsgi-file application.py
+```
+
