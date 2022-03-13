@@ -1,7 +1,7 @@
 # Spotify Music Recommender System
 ### OBJECTIVE
 {something more catchier initially}
-We are going to build a music recommender system using spotify api & build a web application through which a user signs-in using his spotify credentials. Inside the application the a curated playlist of 50 songs will be generated based on the user's saved tracks in his spotify library.
+We are going to build a music recommender system from scratch using spotify api & build a web application through which a user signs-in using his spotify credentials. Inside the application the a curated playlist of 50 songs will be generated based on the user's saved tracks in his spotify library.
 
 
 ### ABOUT THE DATASET 
@@ -17,11 +17,25 @@ pip install -r requirements.txt
 
 ### IMPORTING LIBRARIES
 
+
+### EXPLORATORY DATA ANALYSIS
+
+We have used tableau to perform eda due to it's speed & easy use.
+{add tableau images}
+
+
+### USING K-MEANS CLUSTERING 
+
+
+### 
+
 ###  CREATING PICKLE FILES 
 
 
 
 ### USING FLASK FOR BUILDING WEB APP
+
+
 
 ### BUILDING HTML WEB TEMPLATE
 Now we build our html webpage template , make sure you add the html doc & it's dependent file in templates folder since most cloud platforms depend on specific file structure for running/deployment of the application.
