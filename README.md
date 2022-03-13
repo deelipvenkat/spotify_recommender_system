@@ -1,7 +1,7 @@
 # Spotify Music Recommender System
 ### OBJECTIVE
 
-We are going to build a music recommender system from scratch using spotify api & build a web application through which a user signs-in using his spotify credentials. Inside the application the a curated playlist of 50 songs will be generated based on the user's saved tracks in his spotify library.
+We are going to build a content based music recommender system from scratch using spotify api & build a web application through which a user signs-in using his spotify credentials. Inside the application the a curated playlist of 50 songs will be generated based on the user's saved tracks in his spotify library.
 
 
 ### ABOUT THE DATASET 
@@ -27,7 +27,18 @@ We have used tableau to perform eda due to it's speed & easy use.
 ### USING K-MEANS CLUSTERING 
 
 
-### 
+### FEATURE SCALING 
+
+We are going to standardize the dataset using standardscaler function available in scikit-learn.
+
+### COMPUTING USER' SAVED TRAKCS MEAN VECTOR BY CLUSTER
+
+In general most of the recommendation engine projects I have seen compute a single mean vector & compute cosine similarity to that mean vector to get recommendation. But Such techniques have some major disadvantages. 
+
+Taking a simple average of all the songs in a user's saved tracks which are of different genres may result in vector which might lead to recommendations very much far off from user's music taste. So to avoid this problem I have used k-means clustering to categorize the songs into groups first ,which is at a decent level maintainig the coherence in individual group & the cosine similarity of the clusters formed from the 170k songs data is far off , indicating disimilarity between clusters formed.
+
+
+
 
 ###  CREATING PICKLE FILES 
 
