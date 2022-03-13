@@ -1,4 +1,4 @@
-# Spotify Music Recommender System
+# Spotify Music Recommender System (description build in progress)
 ### OBJECTIVE
 
 We are going to build a content based music recommender system from scratch using spotify api & build a web application through which a user signs-in using his spotify credentials. Inside the application the a curated playlist of 50 songs will be generated based on the user's saved tracks in his spotify library.
