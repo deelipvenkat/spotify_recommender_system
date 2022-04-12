@@ -62,9 +62,6 @@ x=sc.transform(data[number_cols].values)
 ### USING K-MEANS CLUSTERING 
 
 ```
-
-
-```
 song_cluster=Pipeline([('kmeans',KMeans(n_clusters=5,init='k-means++',random_state=0))])
 song_cluster.fit(x)
 data['cluster']=song_cluster.predict(x)
@@ -102,6 +99,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from collections import defaultdict
 import startup
 import math
+```
 ```
 application = app = Flask(__name__)
 song_cluster = pickle.load(open('kmeans.pkl', 'rb'))
