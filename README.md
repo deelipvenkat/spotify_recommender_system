@@ -80,6 +80,99 @@ The final model curates playlist from each cluster based on the number of saved 
 ###  CREATING PICKLE FILES 
 
 
+### Authenticating user with spotify login credentials 
+
+```
+import base64, json, requests
+
+SPOTIFY_URL_AUTH = 'https://accounts.spotify.com/authorize/?'
+SPOTIFY_URL_TOKEN = 'https://accounts.spotify.com/api/token/'
+RESPONSE_TYPE = 'code'
+HEADER = 'application/x-www-form-urlencoded'
+REFRESH_TOKEN = ''
+
+def getAuth(client_id, redirect_uri, scope):
+	data = "{}client_id={}&response_type=code&redirect_uri={}&scope={}".format(SPOTIFY_URL_AUTH, client_id, redirect_uri, scope)
+	return data
+
+def getToken(code, client_id, client_secret, redirect_uri):
+	body = {
+		"grant_type": 'authorization_code',
+		"code" : code,
+		"redirect_uri": redirect_uri,
+		"client_id": client_id,
+		"client_secret": client_secret
+	}
+
+
+	auth_str = f"{client_id}:{client_secret}"
+	encoded = base64.urlsafe_b64encode(auth_str.encode()).decode()
+
+	headers = {"Content-Type" : HEADER, "Authorization" : "Basic {}".format(encoded)}
+
+	post = requests.post(SPOTIFY_URL_TOKEN, params=body, headers=headers)
+	return handleToken(json.loads(post.text))
+
+def handleToken(response):
+	auth_head = {"Authorization": "Bearer {}".format(response["access_token"])}
+	REFRESH_TOKEN = response["refresh_token"]
+	return [response["access_token"], auth_head, response["scope"], response["expires_in"]]
+
+def refreshAuth():
+	body = {
+		"grant_type" : "refresh_token",
+		"refresh_token" : REFRESH_TOKEN
+	}
+
+	post_refresh = requests.post(SPOTIFY_URL_TOKEN, data=body, headers=HEADER)
+	p_back = json.dumps(post_refresh.text)
+
+	return handleToken(p_back)
+```
+
+### Generating token to access user data from spotify api
+```
+from flask_spotify_auth import getAuth, refreshAuth, getToken
+
+#Add your client ID and secret key.
+
+CLIENT_ID = "*********"
+
+CLIENT_SECRET = "*********"
+
+red_uri='http://spotifymusicrecommender-env.eba-mpmh9e3q.ap-south-1.elasticbeanstalk.com/callback/'
+#CALLBACK_URL = "https://automated-credit-system.herokuapp.com/"
+#Add needed scope from spotify user
+SCOPE = "user-library-read playlist-modify-public"
+#token_data will hold authentication header with access code, the allowed scopes, and the refresh countdown
+TOKEN_DATA = []
+"""
+def getUser():
+	return getAuth(CLIENT_ID, red_uri, SCOPE)
+
+def getUserToken(code):
+	global TOKEN_DATA
+	TOKEN_DATA = getToken(code, CLIENT_ID, CLIENT_SECRET, red_uri)
+
+"""
+def getUser():
+	return getAuth(CLIENT_ID, "{}:{}/callback/".format(CALLBACK_URL, PORT), SCOPE)
+
+def getUserToken(code):
+	global TOKEN_DATA
+	TOKEN_DATA = getToken(code, CLIENT_ID, CLIENT_SECRET, "{}:{}/callback/".format(CALLBACK_URL, PORT))
+
+def refreshToken(time):
+	time.sleep(time)
+	TOKEN_DATA = refreshAuth()
+
+def getAccessToken():
+	return TOKEN_DATA
+
+```
+
+
+
 
 ### USING FLASK FOR BUILDING WEB APP
 
@@ -163,7 +256,9 @@ body{ background-image: url('../templates/back.png');}
 </body>
 </html>
   ```
-  
+Also we create a folder named 'static' in our root directory which contains the background image for our web app.
+
+
 ### CREATING .ebextension DIRECTORY 
 
 We can configure our Elastic Beanstalk environment & customize aws resources by adding .config files in .ebextensions directory.
