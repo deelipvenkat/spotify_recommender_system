@@ -16,7 +16,30 @@ pip install -r requirements.txt
 ```
 
 ### IMPORTING LIBRARIES
+```
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import plotly.express as px 
+import matplotlib.pyplot as plt
+from skimage import io
 
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
+from sklearn.metrics import euclidean_distances
+from scipy.spatial.distance import cdist
+import spotipy
+import os
+from spotipy.oauth2 import SpotifyClientCredentials
+from collections import defaultdict
+
+import warnings
+warnings.filterwarnings("ignore")
+
+```
 
 ### EXPLORATORY DATA ANALYSIS
 
@@ -24,12 +47,28 @@ We have used tableau to perform eda due to it's speed & easy use.
 {add tableau images}
 
 
-### USING K-MEANS CLUSTERING 
-
 
 ### FEATURE SCALING 
 
 We are going to standardize the dataset using standardscaler function available in scikit-learn.
+
+```
+sc=StandardScaler()
+sc.fit(data[number_cols].values)
+x=sc.transform(data[number_cols].values)
+
+```
+
+### USING K-MEANS CLUSTERING 
+
+```
+
+
+```
+song_cluster=Pipeline([('kmeans',KMeans(n_clusters=5,init='k-means++',random_state=0))])
+song_cluster.fit(x)
+data['cluster']=song_cluster.predict(x)
+```
 
 ### COMPUTING USER' SAVED TRAKCS MEAN VECTOR BY CLUSTER
 
@@ -47,7 +86,59 @@ The final model curates playlist from each cluster based on the number of saved 
 
 ### USING FLASK FOR BUILDING WEB APP
 
+```
+import numpy as np
+import pandas as pd
+from flask import Flask, request, jsonify, render_template,redirect
+import pickle
+from sklearn.metrics.pairwise import cosine_similarity
+from collections import defaultdict
+from sklearn.metrics import euclidean_distances
+from scipy.spatial.distance import cdist
+import difflib
+import spotipy
+import os
+from spotipy.oauth2 import SpotifyClientCredentials
+from collections import defaultdict
+import startup
+import math
+```
+application = app = Flask(__name__)
+song_cluster = pickle.load(open('kmeans.pkl', 'rb'))
+sc =pickle.load(open('scaling.pkl', 'rb'))
 
+@application.route('/')
+def index():
+    response = startup.getUser()
+    return redirect(response)
+    
+@application.route('/callback/')
+def callback():
+    # Authenticate user with spotify
+    startup.getUserToken(request.args['code'])
+    tk=startup.getAccessToken()[0]
+    sp=spotipy.Spotify(auth=tk)
+    save=sp.current_user_saved_tracks()
+    saved_count=save['total']
+    k=math.ceil(saved_count/20)
+    tom=[]
+    for i in range(0,k):
+        lis=sp.current_user_saved_tracks(offset=(20*i))
+        tom.extend(lis['items'])
+    w=[]
+    for i in range(0,saved_count):
+        w.append({'name':tom[i]['track']['name'],'year':int(tom[i]['track']['album']['release_date'][:4])})
+    data = pd.read_csv('final_data.csv')
+    f=spotify_df(rec_per_cluster(playlist_cluster_center(w,data)),data)    
+    f=f.reset_index(drop=True)
+    user_id=sp.current_user()['id'] # finding user_id
+    playlist_ids=sp.user_playlist_create(user_id,'music_rec',public=True, collaborative=False)['id']# tracking new playlist_id 
+    sp.playlist_add_items(playlist_ids,list(f.iloc[:,3].values)) # adding songs in the playlist
+    src_html='https://open.spotify.com/embed/playlist/{}?utm_source=generator&theme=0'.format(playlist_ids)
+    return render_template('spotify.html',output=src_html)
+if __name__ == "__main__":
+    application.run(host='localhost',port=4455,debug=True)
+```
 
 ### BUILDING HTML WEB TEMPLATE
 Now we build our html webpage template , make sure you add the html doc & it's dependent file in templates folder since most cloud platforms depend on specific file structure for running/deployment of the application.
