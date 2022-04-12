@@ -76,6 +76,126 @@ Taking a simple average of all the songs in a user's saved tracks which are of d
 The final model curates playlist from each cluster based on the number of saved songs in a cluster .For example if user 'x' has saved songs in library belonging to cluster A ,B,C in 50%, 30% ,20% respectively , our model will generate recommendations of which 50% are from cluster 'A' , 30% from cluster 'B' and so on.
 
 
+```
+def playlist_cluster_center(play,dj):
+# CALCULATING CLUSTER MEANS FOR THE OVERALL SONGS IN THE PLAYLIST.    
+    p_mean=pd.DataFrame()
+    cluster_count=[]
+    a=[_ for _ in range(0,20)]
+    a=pd.DataFrame(a)
+    inp=get_song_df(play,dj)#program checks for songs in the internal database,if not found then connects to spotify api
+    inp_scaled=sc.transform(inp.values)
+    inp['cluster']=song_cluster.predict(inp_scaled)
+    #song_cluster.predict(sc.transform(get_song_df([{'name':'Blood On The Leaves','year':2013}],data)))
+    for i in range(0,20):
+        f=inp[number_cols].loc[inp['cluster']==i]
+        cluster_count.append(f.shape[0])
+
+        
+        p_mean=p_mean.append(pd.DataFrame(np.mean(f.iloc[:,:].values,axis=0).reshape(1,15),columns=number_cols),ignore_index=True)
+    cluster_count=pd.DataFrame(cluster_count)    
+    p_mean_1=pd.concat([p_mean,a,cluster_count],axis=1)
+    p_mean_1.columns=['valence','year','acousticness','popularity', 'danceability', 'duration_ms', 'energy', 'explicit','instrumentalness', 'key', 'liveness', 'loudness', 'mode','speechiness', 'tempo','cluster','count']
+    #pd.DataFrame(p_mean_1,columns=['clusters','counts'])
+    return p_mean_1
+```
+
+### collecting songs data 
+```
+def find_song(name, year):
+# finding the audio features of the song using spotify api if the song features are not found in our database.    
+    song_data = defaultdict()
+    token=startup.getAccessToken()[0]
+    sp = spotipy.Spotify(auth=token)
+   
+    results = sp.search(q= 'track: {} year: {}'.format(name,year), limit=1)
+    if results['tracks']['items'] == []:
+        return None
+
+    results = results['tracks']['items'][0]
+    track_id = results['id']
+    audio_features = sp.audio_features(track_id)[0]
+
+    song_data['name'] = [name]
+    song_data['year'] = [year]
+    song_data['explicit'] = [int(results['explicit'])]
+    song_data['duration_ms'] = [results['duration_ms']]
+    song_data['popularity'] = [results['popularity']]
+
+    for key, value in audio_features.items():
+        song_data[key] = value
+
+    return pd.DataFrame(song_data)
+
+
+def get_song_data(song,dj):
+    
+# searches for the song data in our database using the name & year of song release as unique pair for identification & 
+# if not found in our database , it will request the info using the spotify api.
+    song_data = dj[(dj['name'].str.lower() == song['name'].lower())& (dj['year'] == song['year'])].iloc[0:1,:]
+    if song_data.empty:
+        return find_song(song['name'],song['year'])
+    else:
+        return song_data
+        
+# creates a dataframe containing all the input songs with their audio_features in a dataframe   
+def get_song_df(song_list, dj):
+
+    song_vectors = pd.DataFrame()
+    
+    for song in song_list:
+        song_data = get_song_data(song,dj)
+        if song_data is None:
+            #print('Warning: {} does not exist in Spotify or in database'.format(song['name']))
+            
+            continue
+        song_vector = song_data[number_cols]
+        song_vectors=song_vectors.append(song_vector,ignore_index=True)  
+    return song_vectors[number_cols]
+```
+### Calculating number of recommendations to be generated per cluster.
+
+```
+def rec_per_cluster(e):
+    e=e.dropna(subset=['energy'])
+    e['percent']=(e['count']/e['count'].sum())
+    e['allowed']=round(e['percent']*50)
+    return e
+```
+### generating recommendations per cluster
+
+```
+def rec_songs_by_vector(vec,dji,n_songs):
+    metadata_cols = ['name', 'year', 'artists','id']
+    # standardizing the mean vector & our database songs.
+    vc=vec[number_cols]
+    scaled_data = sc.transform(dji[number_cols].values)
+    scaled_song_center = sc.transform(vc.values)    
+    
+    # calculating cosine similarity distance for each song with the mean vector.
+    distances = cdist(scaled_song_center, scaled_data, 'cosine')
+    index = list(np.argsort(distances)[:, :n_songs][0])
+    
+    rec_songs = dji.iloc[index]
+    
+    # the below line i think is used for excluding recommendations which were already in the playlist.
+    #rec_songs = rec_songs[~rec_songs['name'].isin(song_dict['name'])]
+    
+    
+    return rec_songs[metadata_cols].reset_index(drop=True) # generating an recommendation output of songs in a dataframe.
+```
+
+### GENERATING A PLAYLIST WITH 50 SONGS AS OUTPUTS TAKING IN MEAN CLUSTERS VECTORS    
+```
+def spotify_df(p,di):    
+    spotify=pd.DataFrame()
+    for i in range(0,p.shape[0]):
+        h=p.iloc[i:i+1,:]
+        c=di.loc[di['cluster']==h['cluster'].values[0]]
+        spotify=spotify.append(rec_songs_by_vector(h,c,n_songs=int(h['allowed'].values[0])))
+        spotify_rec=shuffle(spotify,random_state=0)
+    return spotify_rec.iloc[0:50,:]
+```
 
 ###  CREATING PICKLE FILES 
 
